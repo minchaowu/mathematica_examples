@@ -31,6 +31,20 @@ end
 
 @[instance] def {u} inhabited_of_has_zero {α : Type u} [has_zero α] : inhabited α := ⟨0⟩ -- works
 
+namespace tactic
+
+meta def simplify_goal (S : simp_lemmas) (cfg : simp_config := {}) : tactic unit :=
+do t ← target,
+  (new_t, pr) ← simplify S [] t cfg,
+  replace_target new_t pr
+
+meta def simp (cfg : simp_config := {}) : tactic unit :=
+do S ← simp_lemmas.mk_default,
+simplify_goal S cfg >> try triv >> try (reflexivity reducible)
+
+end tactic
+
+
 open tactic
 meta def mk_inhabitant_using (A : expr) (t : tactic unit) : tactic expr :=
 do m ← mk_meta_var A,
